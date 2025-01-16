@@ -6,7 +6,7 @@ spack_version=${1:-v0.23}
 # https://spack.readthedocs.io/en/latest/getting_started.html
 sudo dnf install -y \
 	bzip2 \
-	gcc-toolset-14 \
+	gcc-toolset-13 \
 	git \
 	patch \
 	python3 \
@@ -23,7 +23,7 @@ git clone -c feature.manyFiles=true --depth=1 \
 
 # configure compiler
 (
-	. /opt/rh/gcc-toolset-14/enable
+	. /opt/rh/gcc-toolset-13/enable
 	spack compiler find --scope=site
 )
 
@@ -37,7 +37,6 @@ git clone -c feature.manyFiles=true --depth=1 \
 
 	spack external find --scope=site \
 		--not-buildable \
-		bzip2 \
 		coreutils \
 		curl \
 		diffutils \
@@ -49,8 +48,7 @@ git clone -c feature.manyFiles=true --depth=1 \
 		sed \
 		slurm \
 		tar \
-		unzip \
-		xz
+		unzip
 }
 
 # add repos
