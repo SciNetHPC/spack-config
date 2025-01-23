@@ -1,0 +1,31 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  view: false
+  concretizer:
+    unify: false
+
+  modules:
+    default:
+      arch_folder: false
+      enable::
+        - lmod
+      roots:
+        lmod: modules
+      lmod:
+        hash_length: 0
+        hierarchy:
+          - cuda
+          - lapack
+          - mpi
+        hide_implicits: true
+        projections:
+          all:     '{name}/{version}'
+        all:
+          autoload: direct
+          environment:
+            set:
+              'MODULE_{name}_ROOT': '{prefix}'
+
