@@ -6,26 +6,105 @@ spack:
   view: false
   concretizer:
     unify: false
+    reuse:
+      roots: false
+      from:
+      - type: local
+        exclude:
+        - mpi
+        - +fortran
+        - +mpi
+        include:
+        - '%gcc@11.5.0'
+
+  compilers:
+  - compiler:
+      spec: gcc@=11.5.0
+      operating_system: rocky9
+      target: x86_64
+      paths:
+        cc: /scinet/spack/compilers/core-gcc-11.5.0/bin/core-gcc
+        cxx: /scinet/spack/compilers/core-gcc-11.5.0/bin/core-g++
+        f77: /scinet/spack/compilers/core-gcc-11.5.0/bin/core-gfortran
+        fc: /scinet/spack/compilers/core-gcc-11.5.0/bin/core-gfortran
+      extra_rpaths:
+      - /scinet/spack/compilers/core-gcc-11.5.0/lib64
+      modules: []
+  - compiler:
+      spec: aocc@=5.0.0
+      operating_system: rocky9
+      target: x86_64
+      paths:
+        cc: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/clang
+        cxx: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/clang++
+        f77: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/flang
+        fc: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/flang
+      flags:
+        fflags: --gcc-install-dir=/scinet/spack/compilers/core-gcc-11.5.0/lib/gcc/x86_64-unknown-linux-gnu/11.5.0
+      environment:
+        prepend_path:
+          # otherwise flang1 can't find libquadmath.so.0
+          LD_LIBRARY_PATH: /scinet/spack/compilers/core-gcc-11.5.0/lib64
+      extra_rpaths:
+      - /scinet/spack/compilers/core-gcc-11.5.0/lib64
+      modules: []
+
+  packages:
+    aocc:
+      variants: +license-agreed
+    hdf5:
+      variants: +cxx +fortran +hl +szip
+    mvapich:
+      variants: netmod=ucx process_managers=slurm
+    mvapich-plus:
+      variants: netmod=ucx process_managers=slurm
+    openmpi:
+      variants: fabrics=cma,hcoll,ucc,ucx +openshmem schedulers=slurm
+
+    # hpcx
+    hcoll:
+      buildable: false
+      externals:
+      - spec: hcoll@4.8.3230
+        prefix: /scinet/nvidia/hpcx/v2.21-LTS/hcoll
+    ucc:
+      buildable: false
+      externals:
+      - spec: ucc@1.4.0
+        prefix: /scinet/nvidia/hpcx/v2.21-LTS/ucc
+    ucx:
+      buildable: false
+      externals:
+      - spec: ucx@1.18.0
+        prefix: /scinet/nvidia/hpcx/v2.21-LTS/ucx
 
   modules:
     default:
       arch_folder: false
-      enable::
-        - lmod
+      'enable:':
+      - lmod
       roots:
         lmod: modules
       lmod:
+        core_compilers:
+        - gcc@11.5.0
+        exclude:
+        - lmod
         hash_length: 0
-        hierarchy:
-          - cuda
-          - lapack
-          - mpi
         hide_implicits: true
+        hierarchy:
+        - mpi
+        - lapack
         projections:
-          all:     '{name}/{version}'
+          all: '{name}/{version}'
         all:
           autoload: direct
           environment:
             set:
-              'MODULE_{name}_ROOT': '{prefix}'
+              MODULE_{name}_ROOT: '{prefix}'
+
+  specs:
+  - cmake
+  - lmod
+  - ninja
 

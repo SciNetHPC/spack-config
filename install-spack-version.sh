@@ -1,43 +1,26 @@
 #!/bin/sh
 set -eu
+umask 0022
 
 spack_version=${1:-v0.23}
 
-# prerequisites
-# https://spack.readthedocs.io/en/latest/getting_started.html
-sudo dnf install -y \
-	bzip2 \
-	git \
-	patch \
-	python3 \
-	unzip \
-	xz
+cd /scinet/spack
 
 # download
 git clone -c feature.manyFiles=true --depth=1 \
-	--branch=releases/$spack_version \
-	https://github.com/spack/spack.git $spack_version
+	--branch="releases/$spack_version" \
+	https://github.com/spack/spack.git "$spack_version"
 
 # setup spack environment
-. $spack_version/share/spack/setup-env.sh
+. "$spack_version/share/spack/setup-env.sh"
 
-# use OS for basic and/or sensitive packages
-# https://github.com/NERSC/spack-infrastructure/blob/main/spack-externals.md
-{
-	sudo dnf install -y \
-		libcurl-devel \
-		openssl-devel
+# common cache directory
+mkdir -p cache
+spack config --scope=site add "config:source_cache:/scinet/spack/cache"
 
-	spack external find --scope=site \
-		--not-buildable \
-		coreutils \
-		curl \
-		diffutils \
-		findutils \
-		git \
-		openssh \
-		openssl \
-		sed \
-		tar
-}
+# we have lots of cores
+spack config --scope=site add "config:build_jobs:128"
+
+# don't put 'linux' in the arch directories
+spack config --scope=site add "config:install_tree:projections:all:'{architecture.os}-{architecture.target}/{compiler.name}-{compiler.version}/{name}-{version}-{hash}'"
 

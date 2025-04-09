@@ -1,0 +1,117 @@
+#!/bin/bash
+set -efuv -o pipefail
+ulimit -t unlimited
+umask 0022
+export LC_ALL=C
+trap 'echo internal error at line $LINENO' ERR
+
+# where software gets built
+workspace_root=${WORK_ROOT:-/dev/shm/$USER}
+workspace_template="$workspace_root/gcc-build.XXXXXX"
+
+# disable tput if stdout or stderr are not terminals
+[[ -t 1 && -t 2 ]] || tput() { :; }
+
+log() {
+    echo "$(tput sgr0)$(tput bold)$0${action+ }${action-}: $*$(tput sgr0)" >&2
+}
+
+info() {
+    log "$*"
+}
+
+error() {
+    log "$(tput setaf 1)$*"
+    exit 1
+}
+
+now() {
+    date +%s
+}
+
+start_timer() {
+    start_time=$(now)
+}
+
+show_timer() {
+    local dt elapsed
+    dt=$(( $(now) - start_time ))
+    if (( dt >= 600 )); then
+        elapsed="$(( dt / 60 )) minutes"
+    else
+        elapsed="$dt seconds"
+    fi
+    info "elapsed time: $elapsed"
+}
+
+remove_dir() {
+    if [[ -d $1 ]]; then
+        chmod -R +w "$1"
+        rm -r "$1"
+    fi
+}
+
+cleanup() {
+    local status=$?
+    tput sgr0 # cleanup terminal
+    remove_dir "$workspace"
+    exit $status
+}
+
+# go
+
+origpwd="$PWD"
+
+# need C/C++ compilers
+if ! { which gcc &> /dev/null || [[ -v CC ]]; }; then
+    error "need C compiler -- cannot find gcc or \$CC"
+fi
+if ! { which g++ &> /dev/null || [[ -v CXX ]]; }; then
+    error "need C++ compiler -- cannot find g++ or \$CXX"
+fi
+
+start_timer
+
+# create temporary work directory, and automatically clean it up
+# shellcheck disable=SC2174
+mkdir -p -m 0750 "$workspace_root"
+workspace=$(mktemp -d "$workspace_template")
+trap cleanup EXIT
+pushd "$workspace"
+
+# download/unpack
+
+version="11.5.0"
+sha512sum="88f17d5a5e69eeb53aaf0a9bc9daab1c4e501d145b388c5485ebeb2cc36178fbb2d3e49ebef4a8c007a05e88471a06b97cf9b08870478249f77fbfa3d4abd9a8"
+archive="gcc-${version}.tar.xz"
+url="https://ftpmirror.gnu.org/gcc/gcc-${version}/${archive}"
+
+wget "$url"
+sha512sum --check <<<"$sha512sum $archive"
+tar -xaf "$archive"
+
+# get dependencies
+
+cd "gcc-${version}"
+./contrib/download_prerequisites
+
+# configure:
+#   --build=x86_64-unknown-linux-gnu: x86_64-pc-linux-gnu causes problems w/ clang
+#   --disable-multilib: don't build i386
+#   --program-prefix=core-: core-gcc, core-g++, etc
+
+mkdir build
+cd build
+../configure --prefix="$origpwd/core-gcc-$version" \
+    --build=x86_64-unknown-linux-gnu \
+    --disable-multilib \
+    --enable-languages=c,c++,fortran,lto \
+    --program-prefix=core-
+
+make -j"$(nproc)"
+make install
+
+# done
+
+show_timer
+
