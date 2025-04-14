@@ -7,6 +7,8 @@ env=$1
 spack env create "$env" ./spack.yaml
 spack env activate "$env"
 
+spack repo add repos/scinet
+
 # use OS for basic and/or sensitive packages
 # https://github.com/NERSC/spack-infrastructure/blob/main/spack-externals.md
 spack external find --not-buildable \

@@ -41,9 +41,10 @@ spack:
     mvapich-plus:
       variants: netmod=ucx process_managers=slurm
     openmpi:
-      variants: fabrics=cma,hcoll,ucc,ucx +openshmem schedulers=slurm
+      require: fabrics=cma,hcoll,ucc,ucx +openshmem schedulers=slurm
 
     # hpcx
+    # https://github.com/spack/spack/issues/49892
     hcoll:
       buildable: false
       externals:
@@ -55,10 +56,7 @@ spack:
       - spec: ucc@1.4.0
         prefix: /scinet/nvidia/hpcx/v2.21-LTS/ucc
     ucx:
-      buildable: false
-      externals:
-      - spec: ucx@1.18.0
-        prefix: /scinet/nvidia/hpcx/v2.21-LTS/ucx
+      require: "@1.18"
 
   modules:
     default:
