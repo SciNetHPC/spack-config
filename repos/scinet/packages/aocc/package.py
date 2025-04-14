@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: (Apache-2.0 OR MIT)
 
+import os
 from llnl.util import tty
 
 from spack.package import *
@@ -60,7 +61,8 @@ class Aocc(Package, LlvmDetection, CompilerPackage):
         url="https://download.amd.com/developer/eula/aocc-compiler/aocc-compiler-3.2.0.tar",
     )
 
-    depends_on("c", type="build")  # generated
+    requires("%gcc")
+    depends_on("patchelf@:0.17", type="build")
 
     # Licensing
     license_url = "https://www.amd.com/en/developer/aocc/aocc-compiler/eula.html"
@@ -108,11 +110,38 @@ class Aocc(Package, LlvmDetection, CompilerPackage):
     def cfg_files(self):
         # Add path to gcc/g++ such that clang/clang++ can always find a full gcc installation
         # including libstdc++.so and header files.
-        if self.spec.satisfies("%gcc") and self.compiler.cxx is not None:
-            compiler_options = "--gcc-toolchain={}".format(self.compiler.prefix)
-            for compiler in ["clang", "clang++"]:
-                with open(join_path(self.prefix.bin, "{}.cfg".format(compiler)), "w") as f:
-                    f.write(compiler_options)
+        compiler_options = "--gcc-toolchain='{}'".format(self.compiler.prefix)
+        for compiler in ["clang", "clang++"]:
+            with open(join_path(self.prefix.bin, "{}.cfg".format(compiler)), "w") as f:
+                f.write(compiler_options)
+
+        # flang.cfg isn't recognized yet, so create a wrapper script
+        clang = join_path(self.prefix.bin, "clang")
+        flang = join_path(self.prefix.bin, "flang")
+        os.unlink(flang)
+        with open(flang, "x") as f:
+            f.write(f'#!/bin/sh\nexec -a "$0" "{clang}" {compiler_options} "$@"\n')
+        set_executable(flang)
+
+        # help flang1/2 find libquadmath.so.0
+        libdir = join_path(self.compiler.prefix, "lib64")
+        patchelf = which("patchelf")
+        patchelf.add_default_arg("--set-rpath", libdir)
+        patchelf(join_path(self.prefix.bin, "flang1"))
+        patchelf(join_path(self.prefix.bin, "flang2"))
+
+    def setup_run_environment(self, env):
+        super().setup_run_environment(env)
+        self._setup_env(env)
+
+    def setup_dependent_build_environment(self, env, dependent_spec):
+        super().setup_dependent_build_environment(env, dependent_spec)
+        self._setup_env(env)
+
+    def _setup_env(self, env):
+        if self.spec.satisfies("%gcc") and self.compiler.fc is not None:
+            # otherwise flang1 can't find libquadmath.so.0
+            env.prepend_path("LD_LIBRARY_PATH", join_path(self.compiler.prefix, "lib64"))
 
     compiler_version_regex = r"AOCC_(\d+[._]\d+[._]\d+)"
     fortran_names = ["flang"]
