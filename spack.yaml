@@ -30,24 +30,6 @@ spack:
       extra_rpaths:
       - /scinet/spack/compilers/core-gcc-11.5.0/lib64
       modules: []
-  - compiler:
-      spec: aocc@=5.0.0
-      operating_system: rocky9
-      target: x86_64
-      paths:
-        cc: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/clang
-        cxx: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/clang++
-        f77: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/flang
-        fc: /scinet/spack/compilers/aocc-compiler-5.0.0/bin/flang
-      flags:
-        fflags: --gcc-install-dir=/scinet/spack/compilers/core-gcc-11.5.0/lib/gcc/x86_64-unknown-linux-gnu/11.5.0
-      environment:
-        prepend_path:
-          # otherwise flang1 can't find libquadmath.so.0
-          LD_LIBRARY_PATH: /scinet/spack/compilers/core-gcc-11.5.0/lib64
-      extra_rpaths:
-      - /scinet/spack/compilers/core-gcc-11.5.0/lib64
-      modules: []
 
   packages:
     aocc:

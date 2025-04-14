@@ -29,11 +29,18 @@ spack install --fail-fast
 
 # compilers
 core_gcc='%gcc@11.5.0'
-for compiler in gcc@14; do
+for compiler in aocc gcc@14; do
     spack install --add $compiler $core_gcc
     spack compiler find "$(spack location -i $compiler)"
     # XXX:TBD: compiler tests
 done
+
+# fix aocc to handle non-/usr gcc
+apptainer exec docker://mikefarah/yq yq --inplace 'with(.spack.compilers[].compiler|select(.spec == "aocc@*");
+    .flags.fflags = "--gcc-install-dir=/scinet/spack/compilers/core-gcc-11.5.0/lib/gcc/x86_64-unknown-linux-gnu/11.5.0",
+    .environment.prepend_path.LD_LIBRARY_PATH = "/scinet/spack/compilers/core-gcc-11.5.0/lib64",
+    .extra_rpaths += "/scinet/spack/compilers/core-gcc-11.5.0/lib64"
+)' "$SPACK_ROOT/var/spack/environments/$env/spack.yaml"
 
 # mpi
 for compiler in %aocc@5.0 ; do # %gcc@14; do
