@@ -31,21 +31,30 @@ spack install --fail-fast
 
 # compilers
 core_gcc='%gcc@11.5.0'
-for compiler in aocc gcc@14; do
+aocc="aocc@5.0"
+compilers=( "$aocc" )
+for compiler in "${compilers[@]}"; do
     spack install --add $compiler $core_gcc
     spack compiler find "$(spack location -i $compiler)"
     # XXX:TBD: compiler tests
+
+    compiler="%$compiler"
+
+    # mpi
+    #spack add openmpi@4 $compiler +cxx +legacylaunchers
+    spack install --add openmpi@5 $compiler
 done
 
-# mpi
-for compiler in %aocc@5.0 ; do # %gcc@14; do
-    spack add openmpi@4 $compiler +cxx +legacylaunchers
-    #spack add openmpi@5 $compiler
+aocc="%$aocc"
+mpi="^openmpi@5 $aocc"
+for pkg in amdblis amdlibflame amdscalapack openblas; do
+    spack add $pkg $aocc
 done
+for pkg in amdfftw fftw hdf5 hpcg netcdf-c netcdf-fortran osu-micro-benchmarks parallel-netcdf wrf; do
+    spack add $pkg $aocc $mpi
+done
+spack add hpl $aocc ^amdblis $aocc $mpi
 spack install --fail-fast
-
-spack add wrf %aocc build_type=dm+sm ^openmpi
-spack install
 
 # regenerate module files
 spack module lmod refresh --delete-tree --yes-to-all

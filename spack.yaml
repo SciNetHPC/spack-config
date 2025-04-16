@@ -22,16 +22,32 @@ spack:
       modules: []
 
   packages:
+    amd-aocl:
+      require: +openmp
+    amdblis:
+      require: threads=openmp
+    amdlibflame:
+      require: threads=openmp
+    amdfftw:
+      require: +openmp
     aocc:
       variants: +license-agreed
+    fftw:
+      variants: +openmp
     hdf5:
       variants: +cxx +fortran +hl +szip
+    hpl:
+      require: +openmp
     mvapich:
       variants: netmod=ucx process_managers=slurm
     mvapich-plus:
       variants: netmod=ucx process_managers=slurm
+    openblas:
+      variants: threads=openmp
     openmpi:
       require: fabrics=cma,hcoll,ucc,ucx +openshmem schedulers=slurm
+    wrf:
+      variants: build_type=dm+sm
 
     # hpcx
     # https://github.com/spack/spack/issues/49892
