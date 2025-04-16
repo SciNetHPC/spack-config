@@ -95,6 +95,7 @@ spack:
           all: '{name}/{version}'
         all:
           autoload: direct
+          template: 'scinet-module.lua'
           environment:
             set:
               MODULE_{name}_ROOT: '{prefix}'

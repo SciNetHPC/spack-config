@@ -8,6 +8,7 @@ spack env create "$env" ./spack.yaml
 spack env activate "$env"
 
 spack repo add repos/scinet
+spack config add "config:template_dirs:$PWD/templates"
 
 # use OS for basic and/or sensitive packages
 # https://github.com/NERSC/spack-infrastructure/blob/main/spack-externals.md
