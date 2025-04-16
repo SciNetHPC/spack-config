@@ -7,7 +7,7 @@ unset FPATH MANPATH
 
 # setup spack
 . /scinet/spack/v0.23/share/spack/setup-env.sh
-export SPACK_DISABLE_LOCAL_CONFIG=true
+export SPACK_DISABLE_LOCAL_CONFIG=x
 
 if [ $# -ne 0 ]; then
     # activate environment
