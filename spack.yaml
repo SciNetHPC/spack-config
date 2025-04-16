@@ -62,7 +62,17 @@ spack:
       - spec: ucc@1.4.0
         prefix: /scinet/nvidia/hpcx/v2.21-LTS/ucc
     ucx:
-      require: "@1.18"
+      require: "@1.18 +cma +dc +dm +ib_hw_tm +knem +mlx5_dv +parameter_checking +rc +rdmacm +ud +verbs"
+    knem:
+      buildable: false
+      externals:
+      - spec: knem@1.1.4
+        prefix: /opt/knem-1.1.4.90mlnx3
+    rdma-core:
+      buildable: false
+      externals:
+      - spec: rdma-core@54.0
+        prefix: /usr
 
   modules:
     default:
