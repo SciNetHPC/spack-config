@@ -48,12 +48,13 @@ done
 
 aocc="%$aocc"
 mpi="^openmpi@5 $aocc"
-for pkg in amdblis amdlibflame amdscalapack openblas; do
+for pkg in amdblis amdlibflame amdscalapack eigen gsl openblas stream; do
     spack add $pkg $aocc
 done
 for pkg in amdfftw fftw hdf5 hpcg netcdf-c netcdf-fortran osu-micro-benchmarks parallel-netcdf wrf; do
     spack add $pkg $aocc $mpi
 done
+spack add lammps $aocc ^amdfftw $aocc $mpi
 spack add hpl $aocc ^amdblis $aocc $mpi
 spack install --fail-fast
 

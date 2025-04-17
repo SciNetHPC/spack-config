@@ -38,6 +38,9 @@ spack:
       variants: +cxx +fortran +hl +szip
     hpl:
       require: +openmp
+    lammps:
+      # '+amoeba ...' list from cmake/presets/most.cmake (2025-04-17)
+      variants: +exceptions +intel +openmp-package +amoeba +asphere +bocs +body +bpm +brownian +cg-dna +cg-spica +class2 +colloid +colvars +compress +coreshell +dielectric +diffraction +dipole +dpd-basic +dpd-meso +dpd-react +dpd-smooth +drude +eff +electrode +extra-command +extra-compute +extra-dump +extra-fix +extra-molecule +extra-pair +fep +granular +interlayer +kspace +lepton +machdyn +manybody +mc +meam +mesont +misc +ml-iap +ml-pod +ml-snap +ml-uf3 +mofff +molecule +openmp +opt +orient +peri +phonon +plugin +poems +qeq +reaction +reaxff +replica +rheo +rigid +shock +sph +spin +srd +tally +uef +voronoi +yaff
     mvapich:
       variants: netmod=ucx process_managers=slurm
     mvapich-plus:
@@ -46,6 +49,10 @@ spack:
       variants: threads=openmp
     openmpi:
       require: fabrics=cma,hcoll,ucc,ucx +openshmem schedulers=slurm
+    stream:
+      # stream_array_size is for 768M L3 cache (dual-socket EPYC 9655/9654)
+      # https://www.amd.com/en/developer/zen-software-studio/applications/spack/stream-benchmark.html
+      require: ntimes=100 +openmp stream_array_size=430080000 stream_type=double
     wrf:
       variants: build_type=dm+sm
 
