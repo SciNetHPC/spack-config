@@ -27,6 +27,7 @@ class Mvapich(AutotoolsPackage):
     license("Unlicense")
 
     # Prefer the latest stable release
+    version("4.0", sha256="c532f7bdd5cca71f78c12e0885c492f6e276e283711806c84d0b0f80bb3e3b74")
     version("3.0", sha256="ee076c4e672d18d6bf8dd2250e4a91fa96aac1db2c788e4572b5513d86936efb")
 
     depends_on("c", type="build")  # generated
@@ -65,13 +66,23 @@ class Mvapich(AutotoolsPackage):
         multi=False,
         description="Number of bits allocated to the rank field (16 or 32)",
     )
-    variant(
-        "pmi_version",
-        description="Which pmi version to be used. If using pmi2 add it to your CFLAGS",
-        default="simple",
-        values=("simple", "pmi2", "pmix"),
-        multi=False,
-    )
+
+    with when("@:3"):
+        variant(
+            "pmi_version",
+            description="Which pmi version to be used. If using pmi2 add it to your CFLAGS",
+            default="simple",
+            values=("simple", "pmi2", "pmix"),
+            multi=False,
+        )
+    with when("@4:"):
+        variant(
+            "pmi_version",
+            description="Which pmi version to be used. If using pmi2 add it to your CFLAGS",
+            default="none",
+            values=("none", "pmi1", "pmi2", "pmix"),
+            multi=False,
+        )
 
     variant(
         "process_managers",
@@ -163,11 +174,12 @@ class Mvapich(AutotoolsPackage):
         # See: http://slurm.schedmd.com/mpi_guide.html#mvapich2
         if "process_managers=slurm" in spec:
             opts = [
-                "--with-pm=slurm",
-                "--with-pmi=simple",
                 "--with-slurm={0}".format(spec["slurm"].prefix),
                 "CFLAGS=-I{0}/include/slurm".format(spec["slurm"].prefix),
             ]
+            if spec.satisfies("@:3"):
+                opts.append("--with-pm=slurm")
+                opts.append("--with-pmi=simple")
         if "none" in spec.variants["process_managers"].value:
             opts = ["--with-pm=none"]
 
@@ -269,7 +281,8 @@ class Mvapich(AutotoolsPackage):
         ]
 
         args.extend(self.enable_or_disable("alloca"))
-        args.append("--with-pmi=" + spec.variants["pmi_version"].value)
+        if not spec.satisfies("pmi_version=none"):
+            args.append("--with-pmi=" + spec.variants["pmi_version"].value)
         if "pmi_version=pmix" in spec:
             args.append("--with-pmix={0}".format(spec["pmix"].prefix))
 

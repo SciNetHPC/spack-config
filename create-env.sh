@@ -42,8 +42,9 @@ for compiler in "${compilers[@]}"; do
     compiler="%$compiler"
 
     # mpi
-    #spack add openmpi@4 $compiler +cxx +legacylaunchers
+    #spack install --add openmpi@4 $compiler +cxx +legacylaunchers
     spack install --add openmpi@5 $compiler
+    spack install --add mvapich@4 $compiler
 done
 
 aocc="%$aocc"
