@@ -116,10 +116,18 @@ spack:
           hpl^blas: '{name}/{version}-{^blas.name}-{^blas.version}'
         all:
           autoload: direct
-          template: 'scinet-module.lua'
           environment:
             set:
               MODULE_{name}_ROOT: '{prefix}'
+    prefix_inspections:
+      ./include:
+      - CPATH
+      ./lib:
+      - LIBRARY_PATH
+      - LD_LIBRARY_PATH
+      ./lib64:
+      - LIBRARY_PATH
+      - LD_LIBRARY_PATH
 
   specs:
   - cmake
