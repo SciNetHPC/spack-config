@@ -111,9 +111,9 @@ spack:
         hide_implicits: true
         hierarchy:
         - mpi
-        - lapack
         projections:
           all: '{name}/{version}'
+          hpl^blas: '{name}/{version}-{^blas.name}-{^blas.version}'
         all:
           autoload: direct
           template: 'scinet-module.lua'

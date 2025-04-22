@@ -81,6 +81,7 @@ else
         spack add $pkg $aocc $mpi
     done
     spack add hpl $aocc ^amdblis $aocc $mpi
+    spack add hpl $aocc ^openblas $aocc $mpi
 fi
 spack install --fail-fast
 
