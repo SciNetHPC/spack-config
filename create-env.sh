@@ -37,6 +37,13 @@ apptainer exec docker://mikefarah/yq yq --inplace \
 # install basics
 spack install --fail-fast
 
+have_nvidia_gpus=false
+if [[ -e /dev/nvidia0 ]]; then
+    have_nvidia_gpus=true
+    spack config add "packages:all:variants:+cuda cuda_arch=90"
+    spack add cuda@12.8 $core_gcc
+fi
+
 # compilers
 aocc="aocc@5.0"
 compilers=( "$aocc" )
@@ -55,14 +62,26 @@ done
 
 aocc="%$aocc"
 mpi="^openmpi@5 $aocc"
-for pkg in amdblis amdlibflame amdscalapack eigen gsl openblas stream; do
+for pkg in amdblis amdlibflame amdscalapack eigen gsl openblas py-numpy stream; do
     spack add $pkg $aocc
 done
-for pkg in amdfftw fftw hdf5 hpcg netcdf-c netcdf-fortran osu-micro-benchmarks parallel-netcdf wrf; do
+for pkg in amdfftw fftw hdf5 osu-micro-benchmarks py-h5py py-mpi4py; do
     spack add $pkg $aocc $mpi
 done
 spack add lammps $aocc ^amdfftw $aocc $mpi
-spack add hpl $aocc ^amdblis $aocc $mpi
+if $have_nvidia_gpus; then
+    # gpu node
+    spack add gromacs $aocc ^amdfftw $aocc
+    for pkg in py-torch; do
+        spack add $pkg $aocc $mpi
+    done
+else
+    # cpu node
+    for pkg in hpcg netcdf-c netcdf-fortran parallel-netcdf wrf; do
+        spack add $pkg $aocc $mpi
+    done
+    spack add hpl $aocc ^amdblis $aocc $mpi
+fi
 spack install --fail-fast
 
 # regenerate module files

@@ -41,6 +41,8 @@ spack:
       variants: +license-agreed
     fftw:
       variants: +openmp
+    gromacs:
+      variants: ~mpi +openmp
     hdf5:
       variants: +cxx +fortran +hl +szip
     hpl:
@@ -59,6 +61,8 @@ spack:
     python:
       # spack likes to install random versions of python deps
       version: [ '3.11' ]
+    py-torch:
+      variants: ~mkldnn
     stream:
       # stream_array_size is for 768M L3 cache (dual-socket EPYC 9655/9654)
       # https://www.amd.com/en/developer/zen-software-studio/applications/spack/stream-benchmark.html
