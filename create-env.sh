@@ -24,7 +24,7 @@ spack external find --not-buildable \
     sed \
     slurm \
     tar
-spack external find bzip2 cpio dos2unix file gnupg ncurses python ruby which xz zip zlib
+spack external find bzip2 cpio dos2unix file gnupg ncurses which xz zip zlib
 spack external find # packages tagged with the "build-tools" or "core-packages"
 
 # install basics
