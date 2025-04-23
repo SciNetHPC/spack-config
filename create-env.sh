@@ -61,6 +61,8 @@ done
 
 aocc="%$aocc"
 mpi="^openmpi@5 $aocc"
+target=$(spack arch --target)
+aocc="$aocc target=$target"
 for pkg in amdblis amdlibflame amdscalapack eigen gsl openblas py-numpy stream; do
     spack add $pkg $aocc
 done
