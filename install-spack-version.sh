@@ -4,8 +4,6 @@ umask 0022
 
 spack_version=${1:-v0.23}
 
-cd /scinet/spack
-
 # download
 git clone -c feature.manyFiles=true --depth=1 \
 	--branch="releases/$spack_version" \
