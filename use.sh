@@ -1,5 +1,7 @@
 #!/bin/sh
 
+unset BASH_ENV
+
 # clear out CCEnv
 clearLmod --quiet
 unset $(env | grep -Eo '^__LMOD_[^=]+')
