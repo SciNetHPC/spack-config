@@ -39,8 +39,12 @@ spack install --fail-fast
 have_nvidia_gpus=false
 if [[ -e /dev/nvidia0 ]]; then
     have_nvidia_gpus=true
-    spack config add "packages:all:variants:+cuda cuda_arch=90"
-    spack add cuda@12.8 $core_gcc
+
+    # this will be ignored if a package uses 'prefer:' in spack.yaml,
+    # so don't do that
+    spack config add "packages:all:prefer:+cuda cuda_arch=90"
+
+    spack add cuda $core_gcc
 fi
 
 # compilers

@@ -21,6 +21,7 @@ spack:
       - /scinet/spack/compilers/core-gcc-11.5.0/lib64
       modules: []
 
+  # note: don't use 'prefer', that's how we enable cuda in create-env.sh
   packages:
     all:
       providers:
@@ -39,6 +40,8 @@ spack:
       require: +openmp
     aocc:
       variants: +license-agreed
+    cuda:
+      version: [ '12.8' ]
     fftw:
       variants: +openmp
     gromacs:
