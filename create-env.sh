@@ -30,7 +30,7 @@ spack external find # packages tagged with the "build-tools" or "core-packages"
 # https://github.com/spack/spack/issues/49697
 core_gcc='%gcc@11.5.0'
 apptainer exec docker://mikefarah/yq yq --inplace \
-    "with(.spack.packages[]|select(.buildable==\"false\"); .require=\"%gcc@11.5.0\")" \
+    "with(.spack.packages[]|select(.externals); .require=\"$core_gcc\")" \
     "$SPACK_ROOT/var/spack/environments/$env/spack.yaml"
 
 # install basics
