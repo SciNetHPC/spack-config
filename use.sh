@@ -1,9 +1,13 @@
 #!/bin/sh
+# shellcheck disable=SC1091
 
 unset BASH_ENV
 
 # clear out CCEnv
-clearLmod --quiet
+# originally we used `clearLmod --quiet`, but that doesn't work in scripts
+module --force purge
+eval "$("$LMOD_DIR/clearLMOD_cmd" --shell bash --full --quiet)"
+# shellcheck disable=SC2046
 unset $(env | grep -Eo '^__LMOD_[^=]+')
 unset FPATH MANPATH
 
@@ -16,6 +20,6 @@ if [ $# -ne 0 ]; then
     spack env activate "$1"
 
     # lmod
-    . $(spack location -i lmod)/lmod/lmod/init/bash
+    . "$(spack location -i lmod)/lmod/lmod/init/bash"
     module use "$SPACK_ROOT/var/spack/environments/$1/modules/Core"
 fi
