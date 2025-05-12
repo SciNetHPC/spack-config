@@ -29,9 +29,12 @@ spack external find # packages tagged with the "build-tools" or "core-packages"
 # XXX:HACK try to prevent externals concretizing w/ multiple compilers
 # https://github.com/spack/spack/issues/49697
 core_gcc='%gcc@11.5.0'
-apptainer exec docker://mikefarah/yq yq --inplace \
-    "with(.spack.packages[]|select(.externals); .require=\"$core_gcc\")" \
-    "$SPACK_ROOT/var/spack/environments/$env/spack.yaml"
+spack_yaml="$SPACK_ROOT/var/spack/environments/$env/spack.yaml"
+yq="apptainer exec docker://mikefarah/yq yq"
+$yq --inplace "with(.spack.packages[]|select(.externals); .require=\"$core_gcc\")" "$spack_yaml"
+
+# don't create lmod modules for externals
+$yq --inplace '.spack.modules.default.lmod.exclude += [(.spack.packages[]|select(.externals)|.externals[0].spec)]' "$spack_yaml"
 
 # install basics
 spack install --fail-fast
