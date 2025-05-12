@@ -134,6 +134,10 @@ spack:
           environment:
             set:
               MODULE_{name}_ROOT: '{prefix}'
+        gromacs:
+          environment:
+            set:
+              GMX_ENABLE_DIRECT_GPU_COMM: 'x'
     prefix_inspections:
       ./include:
       - CPATH
