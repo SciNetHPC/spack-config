@@ -119,6 +119,8 @@ spack:
         core_compilers:
         - gcc@11.5.0
         exclude:
+        - gcc-runtime
+        - glibc
         - lmod
         hash_length: 0
         hide_implicits: true
