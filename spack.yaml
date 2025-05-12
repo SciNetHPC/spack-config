@@ -150,7 +150,14 @@ spack:
 
   specs:
   - cmake
+  - hwloc
   - lmod
+  - meson
   - ninja
+  - numactl
+  - perl
+  - pmix
   - python
+  - sqlite
+  - ucx
 
