@@ -30,12 +30,14 @@ spack:
   # note: don't use 'prefer', that's how we enable cuda in create-env.sh
   packages:
     all:
+      target: [x86_64_v4]
       providers:
         blas: [amdblis, openblas]
         lapack: [amdlibflame, openblas]
         flame: [amdlibflame, libflame]
         fftw-api: [amdfftw, fftw]
         scalapack: [amdscalapack, netlib-scalapack]
+        mpi: [openmpi, mvapich]
     amd-aocl:
       require: +openmp
     amdblis:
@@ -51,7 +53,7 @@ spack:
     fftw:
       variants: +openmp
     gromacs:
-      variants: ~mpi +openmp
+      require: ~mpi +openmp
     hdf5:
       variants: +cxx +fortran +hl +szip
     hpl:
@@ -71,11 +73,13 @@ spack:
       # spack likes to install random versions of python deps
       version: [ '3.11' ]
     py-torch:
-      variants: ~mkldnn
+      require: ~mkldnn
     stream:
       # stream_array_size is for 768M L3 cache (dual-socket EPYC 9655/9654)
       # https://www.amd.com/en/developer/zen-software-studio/applications/spack/stream-benchmark.html
       require: ntimes=100 +openmp stream_array_size=430080000 stream_type=double
+    quantum-espresso:
+      require: +elpa +libxc +openmp
     wrf:
       variants: build_type=dm+sm
 

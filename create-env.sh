@@ -50,46 +50,64 @@ if [[ -e /dev/nvidia0 ]]; then
     spack add cuda $core_gcc
 fi
 
+arch=$(spack arch)
+target=$(spack arch --target)
+
 # compilers
 aocc="aocc@5.0"
-compilers=( "$aocc" )
+gcc="gcc@14.2.0"
+if $have_nvidia_gpus; then
+    compilers=( "$gcc" )
+else
+    compilers=( "$aocc" )
+fi
 for compiler in "${compilers[@]}"; do
     spack install --add $compiler $core_gcc
     spack compiler find "$(spack location -i $compiler)"
     # XXX:TBD: compiler tests
 
     compiler="%$compiler"
+    case $target in
+    zen5)
+        compiler+=" arch=$arch"
+        ;;
+    esac
 
     # mpi
-    #spack install --add openmpi@4 $compiler +cxx +legacylaunchers
-    spack install --add openmpi@5 $compiler
-    spack install --add mvapich@4 $compiler
+    spack add openmpi@4 $compiler +cxx +legacylaunchers
+    spack add openmpi@5 $compiler
+    spack add mvapich@4 $compiler
+    spack install --fail-fast
 done
 
-aocc="%$aocc"
-mpi="^openmpi@5 $aocc"
-target=$(spack arch --target)
-aocc="$aocc target=$target"
-for pkg in amdblis amdlibflame amdscalapack eigen gsl openblas py-numpy stream; do
-    spack add $pkg $aocc
+if $have_nvidia_gpus; then
+    compiler="%$gcc"
+else
+    compiler="%$aocc arch=$arch"
+fi
+mpi="^openmpi@5 $compiler"
+for pkg in amdblis amdlibflame eigen gsl openblas py-numpy stream; do
+    spack add $pkg $compiler
 done
 for pkg in amdfftw fftw hdf5 osu-micro-benchmarks py-h5py py-mpi4py; do
-    spack add $pkg $aocc $mpi
+    spack add $pkg $compiler $mpi
 done
-spack add lammps $aocc ^amdfftw $aocc $mpi
+spack add lammps $compiler ^amdfftw $compiler $mpi
+#spack add namd $compiler fftw=amdfftw
+#spack add nekrs $compiler $mpi
 if $have_nvidia_gpus; then
     # gpu node
-    spack add gromacs $aocc ^amdfftw $aocc
+    spack add gromacs $compiler ^amdfftw $compiler
     for pkg in py-torch; do
-        spack add $pkg $aocc $mpi
+        spack add $pkg $compiler $mpi
     done
 else
     # cpu node
-    for pkg in hpcg netcdf-c netcdf-fortran parallel-netcdf wrf; do
-        spack add $pkg $aocc $mpi
+    for pkg in amdscalapack hpcg netcdf-c netcdf-fortran parallel-netcdf quantum-espresso wrf; do
+        spack add $pkg $compiler $mpi
     done
-    spack add hpl $aocc ^amdblis $aocc $mpi
-    spack add hpl $aocc ^openblas $aocc $mpi
+    spack add hpl $compiler ^amdblis $compiler $mpi
+    spack add hpl $compiler ^openblas $compiler $mpi
 fi
 spack install --fail-fast
 
