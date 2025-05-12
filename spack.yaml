@@ -6,6 +6,12 @@ spack:
   view: false
   concretizer:
     unify: false
+    reuse:
+      roots: true
+      from:
+      - type: local
+        include:
+        - "%gcc@11.5.0"
 
   compilers:
   - compiler:
